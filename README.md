@@ -32,3 +32,32 @@ Reinicie o Tomcat após a alteração.
 - 8 GB RAM → `-Xms4g` e `-Xmx4g`
 
 - 16 GB RAM → `-Xms8g` e `-Xmx8g`
+
+## Habilitando Glowroot para monitoramento
+
+O Glowroot permite visualizar métricas e rastrear o desempenho durante os testes de carga.
+
+1. Certifique-se de que o arquivo `glowroot.jar` esteja em:
+    ```
+    bundles/glowroot/glowroot.jar
+    ```
+
+2. Antes de iniciar o Tomcat, exporte a variável de ambiente:
+    ```
+    export GLOWROOT_ENABLED=true
+    ```
+
+3. Inicie o portal normalmente:
+    ```
+    lfr start
+    ```
+    ou
+    ```
+    blade server start
+    ```
+
+Acesse a interface do Glowroot em:
+
+```
+http://localhost:8080/o/glowroot
+```
