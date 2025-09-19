@@ -1,28 +1,33 @@
 import http from "k6/http";
 import { sleep } from "k6";
 
-// Configuração do teste de carga
+/**
+ * Configuração do teste de carga
+ * - Stages: simula o aumento e redução gradual de usuários virtuais (VUs)
+ * - Thresholds: define critérios de sucesso/falha do teste
+ */
 export const options = {
     stages: [
-        { duration: "2m", target: 200 }, // aquecimento: sobe até 200 VUs
-        { duration: "3m", target: 500 }, // mantém 500 VUs por 3 min
+        { duration: "2m", target: 200 }, // aquecimento até 200 VUs
+        { duration: "3m", target: 500 }, // mantém 500 VUs
         { duration: "2m", target: 1000 }, // rampa até 1000 VUs
         { duration: "3m", target: 1000 }, // carga máxima sustentada
-        { duration: "2m", target: 0 }, // rampa para desligar
+        { duration: "2m", target: 0 }, // ramp down
     ],
     thresholds: {
-        http_req_failed: ["rate<0.01"], // menos de 1% de falhas
+        http_req_failed: ["rate<0.01"], // <1% falhas
         http_req_duration: [
-            "avg<1000", // tempo médio < 1s
-            "p(90)<1500", // 90% das requisições < 1.5s
+            "avg<1000", // média < 1s
+            "p(90)<1500", // 90% < 1.5s
             "p(95)<2000", // 95% < 2s
-            "p(99)<4000", // 99% < 4s (tolera picos)
+            "p(99)<4000", // 99% < 4s
         ],
-        checks: ["rate>0.99"], // pelo menos 99% das verificações passaram
+        checks: ["rate>0.99"], // >99% dos checks passam
     },
 };
 
-// Caminhos a serem testados (simula navegação real)
+// Endpoints que simulam navegação real
+const BASE_URL = "http://localhost:8080"; // substitua pela URL real
 const paths = [
     "/",
     "/web/portalone/noticias",
@@ -37,15 +42,14 @@ const paths = [
     "/web/portalone/dialect-theme",
 ];
 
-const BASE_URL = "http://localhost:8080";
-
+/**
+ * Função principal executada por cada VU:
+ * - Escolhe uma rota aleatória
+ * - Realiza uma requisição HTTP GET
+ * - Simula tempo de leitura/click (0–3s)
+ */
 export default function () {
-    // Seleciona uma rota aleatória
     const path = paths[Math.floor(Math.random() * paths.length)];
-
-    // Faz a requisição HTTP simulando o acesso do usuário
     http.get(`${BASE_URL}${path}`);
-
-    // Pausa aleatória (0–3s) para simular tempo de leitura/click do usuário
     sleep(Math.random() * 3);
 }
